@@ -30,6 +30,7 @@ MainWindow::MainWindow(QWidget *parent)
 
 MainWindow::~MainWindow()
 {
+    db.close();
     delete ui;
 }
 
@@ -43,7 +44,7 @@ void MainWindow::on_pushButton_clicked()
     QSqlQuery query(db);
     query.prepare("SELECT * FROM users WHERE username = :username AND password = :password");
 
-    // Bind values to the placeholders
+
     query.bindValue(":username", username);  // Binding the username parameter
     query.bindValue(":password", password);
 
@@ -70,8 +71,7 @@ void MainWindow::on_pushButton_clicked()
         QMessageBox::warning(this, "Login Failed", "Invalid username or password.");
     }
 
-    // Close the database connection
-    db.close();
+
 }
 
 void MainWindow::on_pushButton_2_clicked()

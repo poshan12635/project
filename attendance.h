@@ -2,9 +2,10 @@
 #define ATTENDANCE_H
 
 #include <QDialog>
+#include <QTableWidget>  // 👈 Include this
 
 namespace Ui {
-class attendance;  // Forward declaration of UI class
+class attendance;
 }
 
 class attendance : public QDialog
@@ -15,8 +16,14 @@ public:
     explicit attendance(QWidget *parent = nullptr);
     ~attendance();
 
+private slots:
+    void onComboBoxChanged(const QString &selectedText);
+    void onCheckboxClicked(int state, const QString &name, const QString &tableName);
+
+    void on_pushButton_clicked();
+
 private:
-    Ui::attendance *ui;  // This was missing
+    Ui::attendance *ui;
 };
 
 #endif // ATTENDANCE_H
