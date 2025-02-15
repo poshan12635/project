@@ -12,7 +12,6 @@ MainWindow::MainWindow(QWidget *parent)
     , ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // Establish database connection only once
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName("C:\\Users\\karki\\project\\database\\admin.db");
 
@@ -22,7 +21,7 @@ MainWindow::MainWindow(QWidget *parent)
         return;
     }
 
-    // Correct `connect()` syntax with function pointers
+
     connect(ui->pushButton, &QPushButton::clicked, this, &MainWindow::on_pushButton_clicked);
     connect(ui->pushButton_2, &QPushButton::clicked, this, &MainWindow::on_pushButton_2_clicked);
 }
@@ -46,7 +45,7 @@ void MainWindow::on_pushButton_clicked()
 
     // Bind values to the placeholders
     query.bindValue(":username", username);  // Binding the username parameter
-    query.bindValue(":password", password);  // Binding the password parameter
+    query.bindValue(":password", password);
 
     // Debugging: Check the query being executed
     qDebug() << "Executing query: " << query.executedQuery();
@@ -58,7 +57,7 @@ void MainWindow::on_pushButton_clicked()
     }
 
     // Check if query returns any result
-    if (query.next()) {
+   else  if (query.next()) {
         // Login successful
         QMessageBox::information(this, "Login Successful", "Welcome!");
         attendance *attendanceWindow=new attendance(this);
