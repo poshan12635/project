@@ -6,8 +6,7 @@ attendance::attendance(QWidget *parent)
     , ui(new Ui::attendance)
 {
     ui->setupUi(this);
-    ui->comboBox->addItem("ce23");
-    ui->comboBox->addItem("ce24");
+
 
 }
 
