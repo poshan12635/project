@@ -5,6 +5,7 @@
 #include <QSqlError>
 #include <QMessageBox>
 #include "regi.h"
+#include "attendance.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -13,7 +14,8 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
     // Establish database connection only once
     db = QSqlDatabase::addDatabase("QSQLITE");
-    db.setDatabaseName(QCoreApplication::applicationDirPath()+"admin.db");
+    db.setDatabaseName("C:\\Users\\karki\\project\\database\\admin.db");
+
 
     if (!db.open()) {
         QMessageBox::critical(this, "Database Error", "Failed to open the database.");
@@ -59,6 +61,11 @@ void MainWindow::on_pushButton_clicked()
     if (query.next()) {
         // Login successful
         QMessageBox::information(this, "Login Successful", "Welcome!");
+        attendance *attendanceWindow=new attendance(this);
+        attendanceWindow->setModal(true);
+        attendanceWindow->show();
+
+
     } else {
         // Login failed
         QMessageBox::warning(this, "Login Failed", "Invalid username or password.");

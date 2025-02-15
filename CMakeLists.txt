@@ -16,10 +16,10 @@ find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 
 set(PROJECT_SOURCES
-        main.cpp
-        mainwindow.cpp
-        mainwindow.h
-        mainwindow.ui
+    main.cpp
+    mainwindow.cpp
+    mainwindow.h
+    mainwindow.ui
 )
 
 # Handle the Qt version specific logic
@@ -29,10 +29,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         ${PROJECT_SOURCES}
         regi.h regi.cpp regi.ui
         img.qrc
-        ../../Desktop/admin.db
-        ../../Desktop/admin.sqbpro
 
-
+        attendance.h attendance.cpp attendance.ui
+        attendance.h attendance.cpp attendance.ui
     )
 else()
     if(ANDROID)
@@ -45,6 +44,12 @@ else()
         )
     endif()
 endif()
+
+
+# Copy database files to the build directory (or an appropriate location)
+file(COPY "C:/Users/karki/project/database/admin.db" DESTINATION ${CMAKE_BINARY_DIR}/data/)
+file(COPY "C:/Users/karki/project/database/admin.sqbpro" DESTINATION ${CMAKE_BINARY_DIR}/data/)
+
 
 # Correctly link Qt6::Widgets and Qt6::Sql
 target_link_libraries(untitled PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql)
@@ -64,7 +69,7 @@ set_target_properties(untitled PROPERTIES
 
 include(GNUInstallDirs)
 install(TARGETS untitled
-    BUNDLE DESTINATION .
+    BUNDLE DESTINATION . 
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )

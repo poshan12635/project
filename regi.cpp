@@ -18,7 +18,7 @@ regi::~regi()
     delete ui;
 }
 
-// ✅ Register Button Clicked
+
 void regi::on_pushButton_clicked()
 {
     QString username = ui->lineEdit->text();

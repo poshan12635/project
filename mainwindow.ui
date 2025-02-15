@@ -15,7 +15,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-    background-image: url(:/Desktop/IMG_9513.jpg);
+ 
     background-repeat: no-repeat;
     background-size: cover;
 }
