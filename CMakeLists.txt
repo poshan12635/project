@@ -9,10 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# Find Qt6 packages
+# Find Qt packages
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-
-# Find the specific Qt version (if Qt6 is used, ensure Sql module is included)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets Sql)
 
 set(PROJECT_SOURCES
@@ -22,59 +20,45 @@ set(PROJECT_SOURCES
     mainwindow.ui
 )
 
-# Handle the Qt version specific logic
+# Handle Qt version-specific logic
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(untitled
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
         regi.h regi.cpp regi.ui
         img.qrc
-
-        attendance.h attendance.cpp attendance.ui
         attendance.h attendance.cpp attendance.ui
     )
 else()
-    if(ANDROID)
-        add_library(untitled SHARED
-            ${PROJECT_SOURCES}
-        )
-    else()
-        add_executable(untitled
-            ${PROJECT_SOURCES}
-        )
-    endif()
+    add_executable(untitled
+        ${PROJECT_SOURCES}
+    )
 endif()
 
+# Set the database source and destination paths
+set(DATABASE_SOURCE_DIR "${CMAKE_SOURCE_DIR}/database") # Source directory for database files
+set(DATABASE_DEST_DIR "${CMAKE_BINARY_DIR}/data")       # Destination directory in the build folder
 
-# Copy database files to the build directory (or an appropriate location)
-file(COPY "C:/Users/karki/project/database/admin.db" DESTINATION ${CMAKE_BINARY_DIR}/data/)
-file(COPY "C:/Users/karki/project/database/admin.sqbpro" DESTINATION ${CMAKE_BINARY_DIR}/data/)
+# Create the destination directory if it doesn't exist
+file(MAKE_DIRECTORY ${DATABASE_DEST_DIR})
 
+# Copy database files to the build directory
+file(COPY "${DATABASE_SOURCE_DIR}/admin.db" DESTINATION ${DATABASE_DEST_DIR})
+file(COPY "${DATABASE_SOURCE_DIR}/admin.sqbpro" DESTINATION ${DATABASE_DEST_DIR})
 
-# Correctly link Qt6::Widgets and Qt6::Sql
+# Generate a config.h file with the database path
+configure_file(
+    ${CMAKE_SOURCE_DIR}/config.h.in
+    ${CMAKE_BINARY_DIR}/config.h
+)
+
+# Add the build directory to the include path
+include_directories(${CMAKE_BINARY_DIR})
+
+# Link Qt libraries
 target_link_libraries(untitled PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt${QT_VERSION_MAJOR}::Sql)
 
-# Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
-if(${QT_VERSION} VERSION_LESS 6.1.0)
-  set(BUNDLE_ID_OPTION MACOSX_BUNDLE_GUI_IDENTIFIER com.example.untitled)
-endif()
-
-set_target_properties(untitled PROPERTIES
-    ${BUNDLE_ID_OPTION}
-    MACOSX_BUNDLE_BUNDLE_VERSION ${PROJECT_VERSION}
-    MACOSX_BUNDLE_SHORT_VERSION_STRING ${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}
-    MACOSX_BUNDLE TRUE
-    WIN32_EXECUTABLE TRUE
-)
-
-include(GNUInstallDirs)
-install(TARGETS untitled
-    BUNDLE DESTINATION . 
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
-
-# For Qt6, finalize executable setup
+# Finalize the executable for Qt6
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(untitled)
 endif()

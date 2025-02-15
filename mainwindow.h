@@ -24,7 +24,7 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
-    QSqlDatabase db; // Store database connection as a class member
+    QSqlDatabase db;
 };
 
 #endif // MAINWINDOW_H
