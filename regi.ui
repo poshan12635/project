@@ -28,6 +28,9 @@ QGroupBox {
   <layout class="QVBoxLayout" name="verticalLayout_2">
    <item>
     <widget class="QGroupBox" name="groupBox">
+     <property name="styleSheet">
+      <string notr="true">background-image: url(:/database/576.webp);</string>
+     </property>
      <property name="title">
       <string/>
      </property>

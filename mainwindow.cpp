@@ -6,7 +6,7 @@
 #include <QMessageBox>
 #include "regi.h"
 #include "attendance.h"
-#include<config.h>
+
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
     db = QSqlDatabase::addDatabase("QSQLITE");
-    QString dbPath = QString(DATABASE_PATH) + "/admin.db";
+    QString dbPath = "C:/Users/karki/project/database/admin.db";
     db.setDatabaseName(dbPath);
 
 

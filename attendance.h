@@ -2,7 +2,8 @@
 #define ATTENDANCE_H
 
 #include <QDialog>
-#include <QTableWidget>  // 👈 Include this
+#include <QTableWidget>
+#include <QCheckBox>
 
 namespace Ui {
 class attendance;
@@ -18,9 +19,10 @@ public:
 
 private slots:
     void onComboBoxChanged(const QString &selectedText);
-    void onCheckboxClicked(int state, const QString &name, const QString &tableName);
+    void onCheckBoxClicked(Qt::CheckState state, const QString &name, const QString &tableName);  // Updated to use Qt::CheckState
 
     void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
 
 private:
     Ui::attendance *ui;

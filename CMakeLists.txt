@@ -28,6 +28,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         regi.h regi.cpp regi.ui
         img.qrc
         attendance.h attendance.cpp attendance.ui
+        IMAGE.qrc
+
+
     )
 else()
     add_executable(untitled
@@ -46,11 +49,6 @@ file(MAKE_DIRECTORY ${DATABASE_DEST_DIR})
 file(COPY "${DATABASE_SOURCE_DIR}/admin.db" DESTINATION ${DATABASE_DEST_DIR})
 file(COPY "${DATABASE_SOURCE_DIR}/admin.sqbpro" DESTINATION ${DATABASE_DEST_DIR})
 
-# Generate a config.h file with the database path
-configure_file(
-    ${CMAKE_SOURCE_DIR}/config.h.in
-    ${CMAKE_BINARY_DIR}/config.h
-)
 
 # Add the build directory to the include path
 include_directories(${CMAKE_BINARY_DIR})

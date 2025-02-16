@@ -11,9 +11,9 @@ attendance::attendance(QWidget *parent)
     , ui(new Ui::attendance)
 {
     ui->setupUi(this);
-    ui->comboBox->addItem("ce23");
-    ui->comboBox->addItem("ce24");
-    connect(ui->comboBox, &QComboBox::currentTextChanged, this, &attendance::onComboBoxChanged);
+    ui->comboBox_2->addItem("ce23");
+    ui->comboBox_2->addItem("ce24");
+    connect(ui->comboBox_2, &QComboBox::currentTextChanged, this, &attendance::onComboBoxChanged);
 }
 
 attendance::~attendance()
@@ -55,20 +55,20 @@ void attendance::onComboBoxChanged(const QString &selectedText)
     // Insert data into the table
     int row = 0;
     while (query.next()) {
-        QString name = query.value(0).toString(); // Get Name column data
-        qDebug() << "Name:" << name; // Debug message
+        QString name = query.value(0).toString();
+        qDebug() << "Name:" << name;
 
-        // Insert a new row
         ui->tableWidget->insertRow(row);
 
-        // Set Name column
         QTableWidgetItem *nameItem = new QTableWidgetItem(name);
-        nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable); // Make it read-only
+        nameItem->setFlags(nameItem->flags() & ~Qt::ItemIsEditable);
         ui->tableWidget->setItem(row, 0, nameItem);
 
         // Create checkbox in Status column
         QCheckBox *checkBox = new QCheckBox();
-        connect(checkBox, &QCheckBox::stateChanged, this, [=](int state) { onCheckboxClicked(state, name, selectedText); });
+        connect(checkBox, &QCheckBox::stateChanged, this, [=](int state) {
+            onCheckBoxClicked(static_cast<Qt::CheckState>(state), name, selectedText);
+        });
 
         QWidget *checkBoxWidget = new QWidget();
         QHBoxLayout *layout = new QHBoxLayout(checkBoxWidget);
@@ -82,28 +82,50 @@ void attendance::onComboBoxChanged(const QString &selectedText)
         row++;
     }
 
-    // Resize columns for a better view
     ui->tableWidget->resizeColumnsToContents();
     ui->tableWidget->resizeRowsToContents();
 }
 
 // Function to update "count" column in database when checkbox is clicked
-void attendance::onCheckboxClicked(int state, const QString &name, const QString &tableName)
+void attendance::onCheckBoxClicked(Qt::CheckState state, const QString &name, const QString &tableName)
 {
-    if (state == Qt::Checked) {  // Only increase count when checked
+    if (state == Qt::Checked) { // Only increase count if checked (present)
+        if (tableName.isEmpty() || name.isEmpty()) {
+            QMessageBox::warning(this, "Input Error", "Table name or Name cannot be empty.");
+            return;
+        }
+
         QSqlQuery query;
         QString updateQuery = QString("UPDATE %1 SET count = count + 1 WHERE Name = :name").arg(tableName);
-        query.prepare(updateQuery);
+
+        // Debugging: Log the query being executed
+        qDebug() << "Executing query:" << updateQuery;
+        qDebug() << "With name:" << name;
+
+        if (!query.prepare(updateQuery)) {
+            qDebug() << "Query preparation failed:" << query.lastError().text(); // Debugging if preparation fails
+            QMessageBox::critical(this, "Query Error", "Failed to prepare query: " + query.lastError().text());
+            return;
+        }
+
         query.bindValue(":name", name);
 
         if (!query.exec()) {
+            qDebug() << "Query execution failed:" << query.lastError().text(); // Debugging if exec() fails
             QMessageBox::critical(this, "Update Error", "Failed to update count: " + query.lastError().text());
+        } else {
+            qDebug() << "Count updated successfully for" << name;
         }
     }
 }
+
 
 void attendance::on_pushButton_clicked()
 {
     this->close();
 }
 
+void attendance::on_pushButton_2_clicked()
+{
+    this->close();
+}

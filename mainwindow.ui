@@ -15,6 +15,7 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
+	background-image: url(:/database/576.webp);
  
     background-repeat: no-repeat;
     background-size: cover;

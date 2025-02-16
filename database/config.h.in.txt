@@ -1,7 +1,0 @@
-#ifndef CONFIG_H
-#define CONFIG_H
-
-// Define the path to the database
-#define DATABASE_PATH "@DATABASE_DEST_DIR@"
-
-#endif // CONFIG_H
