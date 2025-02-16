@@ -3,6 +3,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QMessageBox>
+#include <QCryptographicHash>
+
 
 regi::regi(QWidget *parent) :
     QDialog(parent),
@@ -17,6 +19,9 @@ regi::~regi()
 {
     delete ui;
 }
+QString regi::hashPassword(const QString &password) {
+    return QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
+}
 
 
 void regi::on_pushButton_clicked()
@@ -24,6 +29,8 @@ void regi::on_pushButton_clicked()
     QString username = ui->lineEdit->text();
     QString password = ui->lineEdit_2->text();
     QString confirmPassword = ui->lineEdit_3->text();
+    ui->lineEdit_2->setEchoMode(QLineEdit::Password);
+    ui->lineEdit_3->setEchoMode(QLineEdit::Password);
 
 
     if (username.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {

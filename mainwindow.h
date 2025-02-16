@@ -25,6 +25,7 @@ private slots:
 private:
     Ui::MainWindow *ui;
     QSqlDatabase db;
+    QString hashPassword(const QString &password);
 };
 
 #endif // MAINWINDOW_H

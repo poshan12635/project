@@ -7,17 +7,18 @@ namespace Ui {
 class regi;
 }
 
-class regi : public QDialog  // ✅ Ensure inheritance from QDialog
+class regi : public QDialog
 {
     Q_OBJECT
 
 public:
-    explicit regi(QWidget *parent = nullptr);  // ✅ Constructor
+    explicit regi(QWidget *parent = nullptr);
     ~regi();
 
 private slots:
-    void on_pushButton_clicked();  // ✅ Register Button
-    void on_pushButton_2_clicked(); // ✅ Back to Login Button
+    void on_pushButton_clicked();
+    void on_pushButton_2_clicked();
+    QString hashPassword(const QString &password);
 
 private:
     Ui::regi *ui;
