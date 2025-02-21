@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>712</width>
-    <height>472</height>
+    <height>334</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,14 +41,52 @@ QPushButton:hover {
    <widget class="QGroupBox" name="groupBox">
     <property name="geometry">
      <rect>
-      <x>50</x>
+      <x>70</x>
       <y>10</y>
       <width>351</width>
-      <height>261</height>
+      <height>271</height>
      </rect>
     </property>
     <property name="styleSheet">
-     <string notr="true">background-color: rgb(255, 255, 255);
+     <string notr="true">QGroupBox {
+    background-color: white;
+    border: 1px solid gray; /* Optional: adds a border */
+    border-radius: 5px; /* Optional: rounds the corners */
+}
+
+QGroupBox::title {
+    background-color: transparent;
+    subcontrol-origin: margin;
+    padding: 5px; /* Adds spacing around the title */
+}
+
+QGroupBox QLabel {
+    font-size: 18px; /* Adjust label font size */
+    color: black; /* Change label text color */
+}
+
+QGroupBox QLineEdit {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 3px; /* Adds inner padding for text input */
+}
+
+QGroupBox QPushButton {
+    background-color: #007BFF; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+QGroupBox QPushButton:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+QGroupBox QPushButton:pressed {
+    background-color: #004494; /* Even darker blue when pressed */
+}
 </string>
     </property>
     <property name="title">

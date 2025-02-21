@@ -15,7 +15,6 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    // Mask password input
     ui->lineEdit_2->setEchoMode(QLineEdit::Password);
 
     // Database connection
@@ -38,7 +37,6 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
 QString MainWindow::hashPassword(const QString &password) {
     return QString(QCryptographicHash::hash(password.toUtf8(), QCryptographicHash::Sha256).toHex());
 }
@@ -48,18 +46,17 @@ void MainWindow::on_pushButton_clicked()
 {
     QString username = ui->lineEdit->text();
     QString password = ui->lineEdit_2->text();
-    QString hashedPassword = hashPassword(password);
+    QString hashedPassword = hashPassword(password);  // Hash the entered password
 
     if (username.isEmpty() || password.isEmpty()) {
         QMessageBox::warning(this, "Login Failed", "Please enter both username and password.");
         return;
     }
 
-
     QSqlQuery query(db);
     query.prepare("SELECT * FROM users WHERE username = :username AND password = :password");
     query.bindValue(":username", username);
-    query.bindValue(":password", password);
+    query.bindValue(":password", password);  // ✅ Use the hashed password
 
     if (!query.exec()) {
         QMessageBox::critical(this, "Query Error", query.lastError().text());
@@ -67,10 +64,13 @@ void MainWindow::on_pushButton_clicked()
     }
 
     if (query.next()) {
-        QMessageBox::information(this, "Login Successful", "Welcome!");
-        attendance *attendanceWindow = new attendance(this);
-        attendanceWindow->setModal(true);
-        attendanceWindow->show();
+        if (!attendanceWindow) {
+            attendanceWindow = new attendance();
+             attendanceWindow->setAttribute(Qt::WA_DeleteOnClose);
+        }
+        attendanceWindow->showMaximized();
+
+
     } else {
         QMessageBox::warning(this, "Login Failed", "Invalid username or password.");
     }

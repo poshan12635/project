@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>456</width>
-    <height>406</height>
+    <height>303</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -35,151 +35,155 @@ QPushButton:hover {
 QTableWidget{
 background:transparent;}</string>
   </property>
-  <widget class="QLabel" name="label">
-   <property name="geometry">
-    <rect>
-     <x>110</x>
-     <y>50</y>
-     <width>141</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QLabel{
-	background-color: rgb(85, 255, 127);
-font-size:20px;}</string>
-   </property>
-   <property name="text">
-    <string>Welcome </string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="label_2">
-   <property name="geometry">
-    <rect>
-     <x>50</x>
-     <y>100</y>
-     <width>81</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">QLabel{
-font-size:15px}</string>
-   </property>
-   <property name="text">
-    <string>Session</string>
-   </property>
-  </widget>
-  <widget class="QComboBox" name="comboBox">
-   <property name="geometry">
-    <rect>
-     <x>140</x>
-     <y>100</y>
-     <width>121</width>
-     <height>21</height>
-    </rect>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="pushButton">
-   <property name="geometry">
-    <rect>
-     <x>350</x>
-     <y>60</y>
-     <width>56</width>
-     <height>21</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>SUBMIT</string>
-   </property>
-  </widget>
-  <widget class="QTableWidget" name="tableWidget">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>170</y>
-     <width>451</width>
-     <height>231</height>
-    </rect>
-   </property>
-   <property name="styleSheet">
-    <string notr="true">background-color: rgb(255, 255, 0);</string>
-   </property>
-  </widget>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>30</y>
-     <width>431</width>
-     <height>131</height>
+     <y>0</y>
+     <width>111</width>
+     <height>301</height>
     </rect>
    </property>
    <property name="styleSheet">
-    <string notr="true">background-color: rgb(85, 255, 127);</string>
+    <string notr="true">QGroupBox {
+    background-color: white;
+    border: 1px solid gray; /* Optional: adds a border */
+    border-radius: 5px; /* Optional: rounds the corners */
+}
+
+
+QGroupBox QLabel {
+    font-size: 18px; /* Adjust label font size */
+    color: black; /* Change label text color */
+}
+
+QGroupBox QLineEdit {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 3px; /* Adds inner padding for text input */
+}
+
+QGroupBox QPushButton {
+    background-color: #007BFF; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}
+
+QGroupBox QPushButton:hover {
+    background-color: #0056b3; /* Darker blue on hover */
+}
+
+QGroupBox QPushButton:pressed {
+    background-color: #004494; /* Even darker blue when pressed */
+}
+</string>
    </property>
    <property name="title">
     <string/>
    </property>
-   <widget class="QLabel" name="label_3">
+   <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>130</x>
+      <x>10</x>
       <y>20</y>
-      <width>111</width>
-      <height>31</height>
+      <width>81</width>
+      <height>51</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">QLabel{
-font-size:20px;}</string>
+    <property name="text">
+     <string>Attendance</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_3">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>90</y>
+      <width>91</width>
+      <height>51</height>
+     </rect>
     </property>
     <property name="text">
-     <string>Welcome</string>
+     <string>Add Class</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_2">
     <property name="geometry">
      <rect>
-      <x>365</x>
-      <y>10</y>
-      <width>61</width>
-      <height>31</height>
+      <x>10</x>
+      <y>160</y>
+      <width>91</width>
+      <height>51</height>
      </rect>
     </property>
-    <property name="styleSheet">
-     <string notr="true">QPushButton{
-font-size:15px;}</string>
+    <property name="text">
+     <string>Download</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_4">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>230</y>
+      <width>91</width>
+      <height>51</height>
+     </rect>
     </property>
     <property name="text">
      <string>Logout</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>0</y>
+     <width>341</width>
+     <height>301</height>
+    </rect>
+   </property>
+   <property name="styleSheet">
+    <string notr="true">QGroupBox {
+    background-color: white;
+    border: 1px solid gray; /* Optional: adds a border */
+    border-radius: 5px; /* Optional: rounds the corners */
+}
+
+QGroupBox::title {
+    background-color: transparent;
+    subcontrol-origin: margin;
+    padding: 5px; /* Adds spacing around the title */
+}
+
+QGroupBox QLabel {
+    font-size: 18px; /* Adjust label font size */
+    color: black; /* Change label text color */
+}
+
+</string>
+   </property>
+   <property name="title">
+    <string/>
+   </property>
+   <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>40</x>
-      <y>70</y>
-      <width>61</width>
-      <height>31</height>
+      <x>20</x>
+      <y>10</y>
+      <width>311</width>
+      <height>41</height>
      </rect>
     </property>
     <property name="styleSheet">
      <string notr="true">QLabel{
-font-size:15px;}</string>
+font-size:20px;}</string>
     </property>
     <property name="text">
-     <string>Session</string>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="comboBox_2">
-    <property name="geometry">
-     <rect>
-      <x>130</x>
-      <y>70</y>
-      <width>291</width>
-      <height>22</height>
-     </rect>
+     <string>Attendance Management System</string>
     </property>
    </widget>
   </widget>

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>472</width>
-    <height>318</height>
+    <width>492</width>
+    <height>333</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -29,7 +29,36 @@ QGroupBox {
    <item>
     <widget class="QGroupBox" name="groupBox">
      <property name="styleSheet">
-      <string notr="true">background-image: url(:/database/576.webp);</string>
+      <string notr="true">QGroupBox {
+    background-color: white;
+    border: 1px solid gray; /* Optional: adds a border */
+    border-radius: 5px; /* Optional: rounds the corners */
+}
+
+QGroupBox::title {
+    background-color: transparent;
+    subcontrol-origin: margin;
+    padding: 5px; /* Adds spacing around the title */
+}
+
+QGroupBox QLabel {
+    font-size: 18px; /* Adjust label font size */
+    color: black; /* Change label text color */
+}
+
+QGroupBox QLineEdit {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 3px;
+    padding: 3px; /* Adds inner padding for text input */
+}
+QGroupBox QPushButton {
+    background-color: #007BFF; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+}</string>
      </property>
      <property name="title">
       <string/>
@@ -56,13 +85,16 @@ font-size:20px}</string>
        <rect>
         <x>10</x>
         <y>120</y>
-        <width>91</width>
-        <height>41</height>
+        <width>101</width>
+        <height>51</height>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">QLabel{
-font-size:20px}</string>
+       <string notr="true">QLabel {
+    font-size: 20px;
+    
+}
+</string>
       </property>
       <property name="text">
        <string>Username</string>
@@ -73,13 +105,16 @@ font-size:20px}</string>
        <rect>
         <x>10</x>
         <y>170</y>
-        <width>91</width>
+        <width>101</width>
         <height>41</height>
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">QLabel{
-font-size:20px}</string>
+       <string notr="true">QLabel {
+    font-size: 20px;
+    
+}
+</string>
       </property>
       <property name="text">
        <string>Password</string>
@@ -105,8 +140,8 @@ font-size:20px}</string>
      <widget class="QLineEdit" name="lineEdit">
       <property name="geometry">
        <rect>
-        <x>110</x>
-        <y>120</y>
+        <x>120</x>
+        <y>130</y>
         <width>321</width>
         <height>31</height>
        </rect>
@@ -115,7 +150,7 @@ font-size:20px}</string>
      <widget class="QLineEdit" name="lineEdit_2">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>120</x>
         <y>170</y>
         <width>321</width>
         <height>31</height>
@@ -125,7 +160,7 @@ font-size:20px}</string>
      <widget class="QLineEdit" name="lineEdit_3">
       <property name="geometry">
        <rect>
-        <x>110</x>
+        <x>120</x>
         <y>220</y>
         <width>321</width>
         <height>31</height>

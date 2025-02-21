@@ -2,8 +2,8 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <QSqlDatabase> // Include this
-
+#include <QSqlDatabase>
+class attendance;
 QT_BEGIN_NAMESPACE
 namespace Ui {
 class MainWindow;
@@ -26,6 +26,7 @@ private:
     Ui::MainWindow *ui;
     QSqlDatabase db;
     QString hashPassword(const QString &password);
+    attendance *attendanceWindow = nullptr;
 };
 
 #endif // MAINWINDOW_H
