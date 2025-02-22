@@ -218,43 +218,64 @@ void attendance::on_pushButton_3_clicked()
 
     // Step 4: Create the Table for this Class
     QSqlQuery createTableQuery;
-    QString createQuery = QString("CREATE TABLE IF NOT EXISTS %1 (Regno INTEGER PRIMARY KEY,Rollno INTEGER,Name TEXT , count INTEGER DEFAULT 0)").arg(className);
+    QString createQuery = QString(
+                              "CREATE TABLE IF NOT EXISTS %1 ("
+                              "Regno INTEGER PRIMARY KEY, "
+                              "Rollno INTEGER, "
+                              "Name TEXT, "
+                              "count INTEGER DEFAULT 0)").arg(className);
 
     if (!createTableQuery.exec(createQuery)) {
         qDebug() << "Table creation failed:" << createTableQuery.lastError().text();
         QMessageBox::critical(this, "Database Error", "Failed to create table.");
+        file.close();
         return;
     }
 
     // Step 5: Read and Insert Data from CSV
     QSqlQuery insertQuery;
+    int rowCount = 0;
+
     while (!in.atEnd()) {
         QString line = in.readLine();
         QStringList values = line.split(",");
 
-        if (values.size() < 5) {
+        // Ensure there are at least 3 values (Regno, Rollno, Name)
+        if (values.size() < 3) {
             qDebug() << "Invalid row format, skipping:" << line;
             continue;
         }
-        int regno=values[0].trimmed().toInt();
-        int rollNo = values[1].trimmed().toInt();
 
+        int regno = values[0].trimmed().toInt();
+        int rollNo = values[1].trimmed().toInt();
         QString name = values[2].trimmed();
 
-        // Insert into database
+        if (name.isEmpty()) {
+            qDebug() << "Skipping row due to empty name:" << line;
+            continue;
+        }
 
-        insertQuery.prepare(QString("INSERT INTO %1 (Regno,Rollno,Name) VALUES (:regno,:rollno, :name)").arg(className));
-        insertQuery.bindValue(":regno",regno);
+        // Insert into database
+        insertQuery.prepare(QString("INSERT INTO %1 (Regno, Rollno, Name, count) VALUES (:regno, :rollno, :name, :count)").arg(className));
+        insertQuery.bindValue(":regno", regno);
         insertQuery.bindValue(":rollno", rollNo);
         insertQuery.bindValue(":name", name);
+        insertQuery.bindValue(":count", 0); // Explicitly inserting default count
 
         if (!insertQuery.exec()) {
             qDebug() << "Insert failed for" << name << ":" << insertQuery.lastError().text();
+        } else {
+            rowCount++;
         }
     }
 
     file.close();
-    QMessageBox::information(this, "Success", "CSV data uploaded successfully for class: " + className);
+
+    if (rowCount > 0) {
+        QMessageBox::information(this, "Success", QString("CSV data uploaded successfully for class: %1\nTotal Records: %2").arg(className).arg(rowCount));
+    } else {
+        QMessageBox::warning(this, "Upload Warning", "No valid records were inserted.");
+    }
 }
 
 
