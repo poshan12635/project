@@ -169,23 +169,6 @@ QGroupBox QLabel {
    <property name="title">
     <string/>
    </property>
-   <widget class="QLabel" name="label">
-    <property name="geometry">
-     <rect>
-      <x>20</x>
-      <y>10</y>
-      <width>311</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="styleSheet">
-     <string notr="true">QLabel{
-font-size:20px;}</string>
-    </property>
-    <property name="text">
-     <string>Attendance Management System</string>
-    </property>
-   </widget>
   </widget>
  </widget>
  <resources/>

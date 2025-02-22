@@ -15,34 +15,49 @@
 #include <QLineEdit>
 #include <QInputDialog>
 #include <QSqlRecord>
-
+#include <QComboBox>
 
 attendance::attendance(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::attendance)
 {
     ui->setupUi(this);
-
-    // Set window properties
-    this->setWindowTitle("Attendance System");
-    this->showMaximized(); // Ensure full screen
-
+    this->showMaximized();
 
     QWidget *centralWidget = new QWidget(this);
-    QHBoxLayout *mainLayout = new QHBoxLayout(centralWidget);
+    QVBoxLayout *mainLayout = new QVBoxLayout(centralWidget);
 
-     ui->groupBox->setMinimumWidth(200);
-    ui->groupBox->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+    QLabel *universityLabel = new QLabel("Kathmandu University", this);
+    universityLabel->setAlignment(Qt::AlignCenter);
+    universityLabel->setStyleSheet("font-size: 22px; font-weight: bold; color: white; "
+                                   "background-color: #0056b3; padding: 12px; "
+                                   "border-radius: 10px;");
+
+    titleLabel = new QLabel("Attendance Management System", this);
+    titleLabel->setAlignment(Qt::AlignCenter);
+    titleLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: white; "
+                              "background-color: #007BFF; padding: 10px; "
+                              "border-radius: 10px;");
+
+    mainLayout->addWidget(universityLabel);
+    mainLayout->addWidget(titleLabel);
+
+    QHBoxLayout *contentLayout = new QHBoxLayout();
+
+    ui->groupBox->setFixedWidth(180); // **Smaller width for button area**
+    ui->groupBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
+
     ui->groupBox_2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
+    contentLayout->addWidget(ui->groupBox);
+    contentLayout->addWidget(ui->groupBox_2, 1); // GroupBox_2 takes most of the space
 
-    mainLayout->addWidget(ui->groupBox, 1);
-    mainLayout->addWidget(ui->groupBox_2, 8);
-
-
+    mainLayout->addLayout(contentLayout);
     centralWidget->setLayout(mainLayout);
     this->setCentralWidget(centralWidget);
 }
+
+
 
 attendance::~attendance()
 {
@@ -51,38 +66,48 @@ attendance::~attendance()
 
 void attendance::on_pushButton_clicked()
 {
-
+    // Ensure layout exists
     if (!ui->groupBox_2->layout()) {
         ui->groupBox_2->setLayout(new QVBoxLayout());
     }
 
-    //  Clear previous contents inside GroupBox_2 safely
+    // Clear previous contents
     QLayout *layout = ui->groupBox_2->layout();
     while (QLayoutItem *child = layout->takeAt(0)) {
         if (child->widget()) {
-            child->widget()->deleteLater(); // Safe deletion
+            child->widget()->deleteLater();
         }
         delete child;
     }
 
-    //  Scroll Area Setup (Ensure it's properly parented)
+    // Create a ComboBox and add it to layout
+    QComboBox *comboBox = new QComboBox();
+    layout->addWidget(comboBox);
+
+    // Fetch class names from the database (excluding system tables and "users")
+    QSqlQuery classQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'users'");
+    while (classQuery.next()) {
+        comboBox->addItem(classQuery.value(0).toString());
+    }
+
+    // Scroll Area for student data
     QScrollArea *scrollArea = new QScrollArea(ui->groupBox_2);
     QWidget *scrollWidget = new QWidget();
     QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
 
-    //  Query to get all table names (excluding system tables)
-    QSqlQuery classQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'users'");
+    // Load data based on selected class
+    connect(comboBox, &QComboBox::currentTextChanged, this, [=](const QString &className) {
+        // Clear previous content
+        while (QLayoutItem *child = scrollLayout->takeAt(0)) {
+            if (child->widget()) {
+                child->widget()->deleteLater();
+            }
+            delete child;
+        }
 
-    while (classQuery.next()) {
-        QString className = classQuery.value(0).toString();
-        qDebug() << "Fetching data for table:" << className;
+        qDebug() << "Fetching data for class: " << className;
 
-        // Add Label for Class Name
-        QLabel *classLabel = new QLabel("Class: " + className);
-        classLabel->setStyleSheet("font-weight: bold; font-size: 14px;");
-        scrollLayout->addWidget(classLabel);
-
-        //  Create TableWidget for students in this class
+        // Table for student attendance
         QTableWidget *tableWidget = new QTableWidget();
         tableWidget->setColumnCount(2);
         tableWidget->setHorizontalHeaderLabels({"Name", "Status"});
@@ -95,7 +120,7 @@ void attendance::on_pushButton_clicked()
         if (!studentQuery.exec()) {
             qDebug() << "Query failed for table " << className << ":" << studentQuery.lastError().text();
             QMessageBox::critical(this, "Query Error", "Failed to fetch data from " + className + ": " + studentQuery.lastError().text());
-            continue;
+            return;
         }
 
         int row = 0;
@@ -105,7 +130,7 @@ void attendance::on_pushButton_clicked()
             tableWidget->insertRow(row);
             tableWidget->setItem(row, 0, new QTableWidgetItem(studentName));
 
-            // Add CheckBox for Attendance
+            // Checkbox for attendance
             QCheckBox *checkBox = new QCheckBox();
             QWidget *checkBoxWidget = new QWidget();
             QHBoxLayout *hLayout = new QHBoxLayout(checkBoxWidget);
@@ -115,30 +140,35 @@ void attendance::on_pushButton_clicked()
             checkBoxWidget->setLayout(hLayout);
             tableWidget->setCellWidget(row, 1, checkBoxWidget);
 
+            // Connect checkbox to update function
+            connect(checkBox, &QCheckBox::stateChanged, this, [=](int state) {
+                onCheckBoxClicked(static_cast<Qt::CheckState>(state), studentName, className);
+            });
+
             row++;
         }
 
-        // Adjust table size
         tableWidget->resizeColumnsToContents();
         tableWidget->resizeRowsToContents();
-
-        // Add table to layout
         scrollLayout->addWidget(tableWidget);
+    });
+
+    // Default: Load first class if available
+    if (comboBox->count() > 0) {
+        comboBox->setCurrentIndex(0);
+        emit comboBox->currentTextChanged(comboBox->currentText());
     }
 
     // Finalizing Scroll Area
     scrollWidget->setLayout(scrollLayout);
     scrollArea->setWidget(scrollWidget);
     scrollArea->setWidgetResizable(true);
-
-    //  Add Scroll Area to GroupBox_2
     layout->addWidget(scrollArea);
 }
 
-
 void attendance::onCheckBoxClicked(Qt::CheckState state, const QString &name, const QString &tableName)
 {
-    if (state == Qt::Checked) { // Only increase count if checked (present)
+    if (state == Qt::Checked) {
         if (tableName.isEmpty() || name.isEmpty()) {
             QMessageBox::warning(this, "Input Error", "Table name or Name cannot be empty.");
             return;
@@ -146,29 +176,18 @@ void attendance::onCheckBoxClicked(Qt::CheckState state, const QString &name, co
 
         QSqlQuery query;
         QString updateQuery = QString("UPDATE %1 SET count = count + 1 WHERE Name = :name").arg(tableName);
-
-        // Debugging: Log the query being executed
         qDebug() << "Executing query:" << updateQuery;
-        qDebug() << "With name:" << name;
-
-        if (!query.prepare(updateQuery)) {
-            qDebug() << "Query preparation failed:" << query.lastError().text();
-            QMessageBox::critical(this, "Query Error", "Failed to prepare query: " + query.lastError().text());
-            return;
-        }
-
+        query.prepare(updateQuery);
         query.bindValue(":name", name);
 
         if (!query.exec()) {
-            qDebug() << "Query execution failed:" << query.lastError().text();
+            qDebug() << "Update failed:" << query.lastError().text();
             QMessageBox::critical(this, "Update Error", "Failed to update count: " + query.lastError().text());
         } else {
             qDebug() << "Count updated successfully for" << name;
         }
     }
 }
-
-
 void attendance::on_pushButton_3_clicked()
 {
     // Step 1: Ask for Class Name
@@ -217,10 +236,10 @@ void attendance::on_pushButton_3_clicked()
             qDebug() << "Invalid row format, skipping:" << line;
             continue;
         }
+        int regno=values[0].trimmed().toInt();
+        int rollNo = values[1].trimmed().toInt();
 
         QString name = values[2].trimmed();
-        int rollNo = values[1].trimmed().toInt();
-        int regno=values[0].trimmed().toInt();
 
         // Insert into database
 
@@ -318,9 +337,7 @@ void attendance::on_pushButton_2_clicked()
     QMessageBox::information(this, "Download Complete", "CSV file saved successfully at: " + filePath);
 }
 
-
 void attendance::on_pushButton_4_clicked()
 {
     this->close();
 }
-

@@ -11,7 +11,8 @@
 #include <QLineEdit>
 #include <QInputDialog>
 #include <QSqlRecord>
-
+#include <QComboBox>
+#include <QLabel>
 
 namespace Ui {
 class attendance;
@@ -42,6 +43,7 @@ private:
     QScrollArea *scrollArea;
     QWidget *scrollWidget;
     QVBoxLayout *scrollLayout;
+    QLabel *titleLabel;
 
     void setupUI();  // Function to initialize scroll area and layouts dynamically
 };

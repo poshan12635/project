@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>712</width>
-    <height>334</height>
+    <height>376</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -42,7 +42,7 @@ QPushButton:hover {
     <property name="geometry">
      <rect>
       <x>70</x>
-      <y>10</y>
+      <y>60</y>
       <width>351</width>
       <height>271</height>
      </rect>
@@ -214,6 +214,28 @@ font-size:15px;}</string>
       <string>Register</string>
      </property>
     </widget>
+   </widget>
+   <widget class="QLabel" name="label_5">
+    <property name="geometry">
+     <rect>
+      <x>120</x>
+      <y>10</y>
+      <width>271</width>
+      <height>41</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+  background-color: #007BFF; /* Blue background */
+    color: white; /* White text */
+    border: none;
+    border-radius: 5px;
+    padding: 5px 10px;
+font-size:25px;}</string>
+    </property>
+    <property name="text">
+     <string>Kathmandu University</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
