@@ -63,6 +63,8 @@ QGroupBox::title {
 QGroupBox QLabel {
     font-size: 18px; /* Adjust label font size */
     color: black; /* Change label text color */
+
+ 
 }
 
 QGroupBox QLineEdit {

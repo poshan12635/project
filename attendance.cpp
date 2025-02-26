@@ -16,6 +16,7 @@
 #include <QInputDialog>
 #include <QSqlRecord>
 #include <QComboBox>
+#include "form.h"
 
 attendance::attendance(QWidget *parent)
     : QMainWindow(parent)
@@ -362,3 +363,11 @@ void attendance::on_pushButton_4_clicked()
 {
     this->close();
 }
+
+void attendance::on_pushButton_5_clicked()
+{
+    Form *formWindow = new Form();
+    formWindow->setAttribute(Qt::WA_DeleteOnClose);
+    formWindow->show();
+}
+

@@ -29,6 +29,8 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         img.qrc
         attendance.h attendance.cpp attendance.ui
         IMAGE.qrc
+        form.h form.cpp form.ui
+
 
 
     )

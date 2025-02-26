@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>456</width>
-    <height>303</height>
+    <height>338</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,7 +41,7 @@ background:transparent;}</string>
      <x>10</x>
      <y>0</y>
      <width>111</width>
-     <height>301</height>
+     <height>341</height>
     </rect>
    </property>
    <property name="styleSheet">
@@ -90,7 +90,7 @@ QGroupBox QPushButton:pressed {
       <x>10</x>
       <y>20</y>
       <width>81</width>
-      <height>51</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -101,9 +101,9 @@ QGroupBox QPushButton:pressed {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>90</y>
+      <y>60</y>
       <width>91</width>
-      <height>51</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -114,9 +114,9 @@ QGroupBox QPushButton:pressed {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>160</y>
+      <y>100</y>
       <width>91</width>
-      <height>51</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
@@ -127,13 +127,26 @@ QGroupBox QPushButton:pressed {
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>230</y>
+      <y>180</y>
       <width>91</width>
-      <height>51</height>
+      <height>31</height>
      </rect>
     </property>
     <property name="text">
      <string>Logout</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_5">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>140</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Edit Class</string>
     </property>
    </widget>
   </widget>
@@ -143,7 +156,7 @@ QGroupBox QPushButton:pressed {
      <x>120</x>
      <y>0</y>
      <width>341</width>
-     <height>301</height>
+     <height>341</height>
     </rect>
    </property>
    <property name="styleSheet">
