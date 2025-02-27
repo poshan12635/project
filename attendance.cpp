@@ -44,21 +44,16 @@ attendance::attendance(QWidget *parent)
     mainLayout->addWidget(titleLabel);
 
     QHBoxLayout *contentLayout = new QHBoxLayout();
-
-    ui->groupBox->setFixedWidth(180); // **Smaller width for button area**
+    ui->groupBox->setFixedWidth(180);
     ui->groupBox->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Expanding);
-
     ui->groupBox_2->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
     contentLayout->addWidget(ui->groupBox);
-    contentLayout->addWidget(ui->groupBox_2, 1); // GroupBox_2 takes most of the space
-
+    contentLayout->addWidget(ui->groupBox_2, 1);
     mainLayout->addLayout(contentLayout);
     centralWidget->setLayout(mainLayout);
     this->setCentralWidget(centralWidget);
 }
-
-
 
 attendance::~attendance()
 {
@@ -67,12 +62,10 @@ attendance::~attendance()
 
 void attendance::on_pushButton_clicked()
 {
-    // Ensure layout exists
     if (!ui->groupBox_2->layout()) {
         ui->groupBox_2->setLayout(new QVBoxLayout());
     }
 
-    // Clear previous contents
     QLayout *layout = ui->groupBox_2->layout();
     while (QLayoutItem *child = layout->takeAt(0)) {
         if (child->widget()) {
@@ -81,24 +74,19 @@ void attendance::on_pushButton_clicked()
         delete child;
     }
 
-    // Create a ComboBox and add it to layout
     QComboBox *comboBox = new QComboBox();
     layout->addWidget(comboBox);
 
-    // Fetch class names from the database (excluding system tables and "users")
     QSqlQuery classQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'users'");
     while (classQuery.next()) {
         comboBox->addItem(classQuery.value(0).toString());
     }
 
-    // Scroll Area for student data
     QScrollArea *scrollArea = new QScrollArea(ui->groupBox_2);
     QWidget *scrollWidget = new QWidget();
     QVBoxLayout *scrollLayout = new QVBoxLayout(scrollWidget);
 
-    // Load data based on selected class
     connect(comboBox, &QComboBox::currentTextChanged, this, [=](const QString &className) {
-        // Clear previous content
         while (QLayoutItem *child = scrollLayout->takeAt(0)) {
             if (child->widget()) {
                 child->widget()->deleteLater();
@@ -106,21 +94,16 @@ void attendance::on_pushButton_clicked()
             delete child;
         }
 
-        qDebug() << "Fetching data for class: " << className;
-
-        // Table for student attendance
         QTableWidget *tableWidget = new QTableWidget();
-        tableWidget->setColumnCount(2);
-        tableWidget->setHorizontalHeaderLabels({"Name", "Status"});
+        tableWidget->setColumnCount(3);
+        tableWidget->setHorizontalHeaderLabels({"Name", "Status", "Reset"});
         tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
-        // Query students for this class
         QSqlQuery studentQuery;
         studentQuery.prepare(QString("SELECT Name FROM %1").arg(className));
 
         if (!studentQuery.exec()) {
-            qDebug() << "Query failed for table " << className << ":" << studentQuery.lastError().text();
-            QMessageBox::critical(this, "Query Error", "Failed to fetch data from " + className + ": " + studentQuery.lastError().text());
+            QMessageBox::critical(this, "Query Error", "Failed to fetch data from " + className);
             return;
         }
 
@@ -131,7 +114,6 @@ void attendance::on_pushButton_clicked()
             tableWidget->insertRow(row);
             tableWidget->setItem(row, 0, new QTableWidgetItem(studentName));
 
-            // Checkbox for attendance
             QCheckBox *checkBox = new QCheckBox();
             QWidget *checkBoxWidget = new QWidget();
             QHBoxLayout *hLayout = new QHBoxLayout(checkBoxWidget);
@@ -141,7 +123,19 @@ void attendance::on_pushButton_clicked()
             checkBoxWidget->setLayout(hLayout);
             tableWidget->setCellWidget(row, 1, checkBoxWidget);
 
-            // Connect checkbox to update function
+            QPushButton *resetButton = new QPushButton("Reset");
+            connect(resetButton, &QPushButton::clicked, this, [=]() {
+                on_reset_button_clicked(checkBox, studentName, className);
+            });
+
+            QWidget *resetBoxWidget = new QWidget();
+            QHBoxLayout *hLayout1 = new QHBoxLayout(resetBoxWidget);
+            hLayout1->addWidget(resetButton);
+            hLayout1->setAlignment(Qt::AlignCenter);
+            hLayout1->setContentsMargins(0, 0, 0, 0);
+            resetBoxWidget->setLayout(hLayout1);
+            tableWidget->setCellWidget(row, 2, resetBoxWidget);
+
             connect(checkBox, &QCheckBox::stateChanged, this, [=](int state) {
                 onCheckBoxClicked(static_cast<Qt::CheckState>(state), studentName, className);
             });
@@ -154,19 +148,16 @@ void attendance::on_pushButton_clicked()
         scrollLayout->addWidget(tableWidget);
     });
 
-    // Default: Load first class if available
     if (comboBox->count() > 0) {
         comboBox->setCurrentIndex(0);
         emit comboBox->currentTextChanged(comboBox->currentText());
     }
 
-    // Finalizing Scroll Area
     scrollWidget->setLayout(scrollLayout);
     scrollArea->setWidget(scrollWidget);
     scrollArea->setWidgetResizable(true);
     layout->addWidget(scrollArea);
 }
-
 void attendance::onCheckBoxClicked(Qt::CheckState state, const QString &name, const QString &tableName)
 {
     if (state == Qt::Checked) {
@@ -189,6 +180,28 @@ void attendance::onCheckBoxClicked(Qt::CheckState state, const QString &name, co
         }
     }
 }
+
+void attendance::on_reset_button_clicked(QCheckBox *checkBox, const QString &name, const QString &tableName)
+{
+    if (!checkBox) return; // Exit if checkbox is null
+
+    checkBox->setChecked(false); // Uncheck the checkbox
+
+    QSqlQuery query;
+    QString updateQuery = QString("UPDATE %1 SET count = count - 1 WHERE Name = :name AND count > 0").arg(tableName);
+
+    query.prepare(updateQuery);
+    query.bindValue(":name", name);
+
+    if (!query.exec()) {
+        QMessageBox::critical(this, "Database Error", "Failed to update count: " + query.lastError().text());
+        qDebug() << "SQL Error: " << query.lastError().text();
+        qDebug() << "Query: " << updateQuery;
+    } else {
+        qDebug() << "Count successfully updated for" << name << "in table" << tableName;
+    }
+}
+
 void attendance::on_pushButton_3_clicked()
 {
     // Step 1: Ask for Class Name
@@ -364,10 +377,12 @@ void attendance::on_pushButton_4_clicked()
     this->close();
 }
 
+
 void attendance::on_pushButton_5_clicked()
 {
     Form *formWindow = new Form();
     formWindow->setAttribute(Qt::WA_DeleteOnClose);
     formWindow->show();
 }
+
 
