@@ -8,6 +8,7 @@
 #include "regi.h"
 #include "attendance.h"
 #include <QDebug>
+#include"mainwindow1.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -83,3 +84,11 @@ void MainWindow::on_pushButton_2_clicked()
     regiWindow->setModal(true);
     regiWindow->show();
 }
+
+void MainWindow::on_pushButton_3_clicked()
+{
+    MainWindow1 *mainwindow=new MainWindow1(this);
+    mainwindow->setWindowModality(Qt::ApplicationModal);
+    mainwindow->show();
+}
+

@@ -30,6 +30,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
         attendance.h attendance.cpp attendance.ui
         IMAGE.qrc
         form.h form.cpp form.ui
+        mainwindow1.h mainwindow1.cpp mainwindow1.ui
+        form123.h form123.cpp form123.ui
+
+
 
 
 
