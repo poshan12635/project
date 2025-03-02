@@ -8,7 +8,7 @@
 #include "regi.h"
 #include "attendance.h"
 #include <QDebug>
-#include "form1234.h"
+
 
 MainWindow1::MainWindow1(QWidget *parent)
     : QMainWindow(parent)
@@ -110,23 +110,8 @@ void MainWindow1::show_details(int regno, QString classname)
             subcontrol-origin: margin;
             padding: 5px;
         }
-        QGroupBox QLabel {
-            font-size: 18px;
-            color: black;
-        }
-        QPushButton {
-            background-color: #007BFF;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            padding: 5px 10px;
-        }
-        QPushButton:hover {
-            background-color: #0056b3;
-        }
-        QPushButton:pressed {
-            background-color: #004494;
-        }
+
+
     )");
 
     bool recordFound = false;

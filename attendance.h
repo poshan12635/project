@@ -39,6 +39,8 @@ private slots:
     void on_pushButton_5_clicked();
     void on_reset_button_clicked(QCheckBox *checkBox, const QString &name, const QString &tableName);
 
+    void on_pushButton_6_clicked();
+
 private:
     Ui::attendance *ui;
 

@@ -77,7 +77,7 @@ void attendance::on_pushButton_clicked()
     QComboBox *comboBox = new QComboBox();
     layout->addWidget(comboBox);
 
-    QSqlQuery classQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'users'");
+    QSqlQuery classQuery("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'users' and name !='studentlog'");
     while (classQuery.next()) {
         comboBox->addItem(classQuery.value(0).toString());
     }
@@ -100,7 +100,7 @@ void attendance::on_pushButton_clicked()
         tableWidget->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 
         QSqlQuery studentQuery;
-        studentQuery.prepare(QString("SELECT Name FROM %1").arg(className));
+        studentQuery.prepare(QString("SELECT Name FROM %1 order by Rollno ASC").arg(className));
 
         if (!studentQuery.exec()) {
             QMessageBox::critical(this, "Query Error", "Failed to fetch data from " + className);
@@ -303,74 +303,124 @@ void attendance::on_pushButton_2_clicked()
         return;
     }
 
-    // Fetch available class names from database
-    QSqlQuery query;
-    query.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name != 'users'");
+    // Connect to both databases
+    QSqlDatabase db1 = QSqlDatabase::addDatabase("QSQLITE", "admin_connection");
+    db1.setDatabaseName("C:/Users/karki/project/database/admin.db");
 
-    if (!query.exec()) {
-        QMessageBox::critical(this, "Database Error", "Failed to fetch class names: " + query.lastError().text());
+    QSqlDatabase db2 = QSqlDatabase::addDatabase("QSQLITE", "student_connection");
+    db2.setDatabaseName("C:/Users/karki/project/database/student.db");
+
+    if (!db1.open() || !db2.open()) {
+        QMessageBox::critical(this, "Database Error", "Failed to open databases.");
         return;
     }
 
-    // Store class names in a list
-    QStringList classList;
-    while (query.next()) {
-        classList.append(query.value(0).toString());
-    }
+    // Validate if className exists in student.db
+    QSqlQuery checkClassQuery(db2);
+    checkClassQuery.prepare("SELECT name FROM sqlite_master WHERE type='table' AND name = :className");
+    checkClassQuery.bindValue(":className", className);
 
-    // Check if the entered class name exists
-    if (!classList.contains(className)) {
-        QMessageBox::warning(this, "Class Not Found", "The class name does not exist in the database.");
+    if (!checkClassQuery.exec() || !checkClassQuery.next()) {
+        QMessageBox::warning(this, "Class Not Found", "The class name does not exist in the student database.");
         return;
     }
 
-    // Ask user for file path to save CSV
+    // Ask for the total number of classes held
+    int totalClasses = QInputDialog::getInt(this, "Total Classes", "Enter the total number of classes:", 1, 1, 1000, 1);
+
+    // Create a new table named className + "info" in student.db
+    QString infoTableName = className + "info";
+    QSqlQuery createTableQuery(db2);
+    QString createTableSQL = QString(
+                                 "CREATE TABLE IF NOT EXISTS %1 ("
+                                 "roll_number INTEGER PRIMARY KEY, "
+                                 "reg_number TEXT UNIQUE, "
+                                 "attendance_count INTEGER, "
+                                 "attendance_percentage REAL, "
+                                 "marks INTEGER"
+                                 ")"
+                                 ).arg(infoTableName);
+
+    if (!createTableQuery.exec()) {
+        QMessageBox::critical(this, "Database Error", "Failed to create table: " + createTableQuery.lastError().text());
+        return;
+    }
+
+    // Fetch roll_number and attendance count from admin.db
+    QSqlQuery adminQuery(db1);
+    adminQuery.prepare(QString("SELECT Rollno, count FROM %1").arg(className));
+
+    if (!adminQuery.exec()) {
+        QMessageBox::critical(this, "Database Error", "Failed to fetch roll numbers and counts from admin database.");
+        return;
+    }
+
+    // Open CSV file for writing
     QString filePath = QFileDialog::getSaveFileName(this, "Save CSV File", className + ".csv", "CSV Files (*.csv);;All Files (*.*)");
-
     if (filePath.isEmpty()) {
         QMessageBox::warning(this, "Download Cancelled", "No file selected.");
         return;
     }
 
-    // Fetch class data
-    query.prepare(QString("SELECT * FROM %1").arg(className));
-
-    if (!query.exec()) {
-        QMessageBox::critical(this, "Database Error", "Failed to fetch data: " + query.lastError().text());
-        return;
-    }
-
-    // Open file for writing
     QFile file(filePath);
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QMessageBox::critical(this, "File Error", "Failed to create file.");
         return;
     }
 
-    // Write data to CSV
     QTextStream out(&file);
-    QSqlRecord record = query.record();
-    int columnCount = record.count();
+    out << "Roll Number,Registration Number,Attendance Count,Attendance Percentage,Marks\n";
 
-    // Write header row
-    for (int i = 0; i < columnCount; ++i) {
-        out << record.fieldName(i);
-        if (i < columnCount - 1) out << ",";
-    }
-    out << "\n";
+    // Process each student
+    while (adminQuery.next()) {
+        int rollNumber = adminQuery.value(0).toInt();
+        int attendanceCount = adminQuery.value(1).toInt();
 
-    // Write data rows
-    while (query.next()) {
-        for (int i = 0; i < columnCount; ++i) {
-            out << query.value(i).toString();
-            if (i < columnCount - 1) out << ",";
+        // Calculate attendance percentage
+        double attendancePercentage = (static_cast<double>(attendanceCount) / totalClasses) * 100.0;
+
+        // Fetch reg_number and marks from student.db
+        QSqlQuery studentQuery(db2);
+        studentQuery.prepare(QString("SELECT reg_number, marks FROM %1 WHERE roll_number = :rollNumber").arg(className));
+        studentQuery.bindValue(":rollNumber", rollNumber);
+
+        QString regNumber;
+        int marks = 0;
+        if (studentQuery.exec() && studentQuery.next()) {
+            regNumber = studentQuery.value(0).toString();
+            marks = studentQuery.value(1).toInt();
+        } else {
+            QMessageBox::warning(this, "Warning", "No matching reg_number and marks found for roll number " + QString::number(rollNumber));
+            continue;
         }
-        out << "\n";
+
+        // Insert or update data into className + "info" table
+        QSqlQuery insertQuery(db2);
+        insertQuery.prepare(QString("INSERT OR REPLACE INTO %1 (roll_number, reg_number, attendance_count, attendance_percentage, marks) VALUES (:rollNumber, :regNumber, :attendanceCount, :attendancePercentage, :marks)")
+                                .arg(infoTableName));
+        insertQuery.bindValue(":rollNumber", rollNumber);
+        insertQuery.bindValue(":regNumber", regNumber);
+        insertQuery.bindValue(":attendanceCount", attendanceCount);
+        insertQuery.bindValue(":attendancePercentage", attendancePercentage);
+        insertQuery.bindValue(":marks", marks);
+
+        if (!insertQuery.exec()) {
+            QMessageBox::critical(this, "Database Error", "Failed to insert data: " + insertQuery.lastError().text());
+            return;
+        }
+
+        // Write to CSV
+        out << rollNumber << "," << regNumber << "," << attendanceCount << "," << attendancePercentage << "," << marks << "\n";
     }
 
     file.close();
-    QMessageBox::information(this, "Download Complete", "CSV file saved successfully at: " + filePath);
+    db1.close();
+    db2.close();
+
+    QMessageBox::information(this, "Download Complete", "CSV file and database records updated successfully.");
 }
+
+
 
 void attendance::on_pushButton_4_clicked()
 {
@@ -385,4 +435,139 @@ void attendance::on_pushButton_5_clicked()
     formWindow->show();
 }
 
+
+
+void attendance::on_pushButton_6_clicked()
+{
+    // Ensure groupBox_2 has a layout
+    if (!ui->groupBox_2->layout()) {
+        ui->groupBox_2->setLayout(new QVBoxLayout());
+    }
+
+    QVBoxLayout *layout = qobject_cast<QVBoxLayout*>(ui->groupBox_2->layout());
+
+    // Clear previous widgets inside groupBox_2
+    while (QLayoutItem *child = layout->takeAt(0)) {
+        if (child->widget()) {
+            child->widget()->deleteLater();
+        }
+        delete child;
+    }
+
+    // Create new GroupBox
+    QGroupBox *newGroupBox = new QGroupBox(this);
+    newGroupBox->setStyleSheet("font-size: 16px; font-weight: bold; padding: 10px; border: 1px solid gray; border-radius: 10px;");
+
+    // Create Layout for GroupBox
+    QGridLayout *groupBoxLayout = new QGridLayout(newGroupBox);
+
+    // Add QLabel for "Upload Internal Marks"
+    QLabel *titleLabel = new QLabel("Upload Internal Marks", newGroupBox);
+    titleLabel->setStyleSheet("font-size: 18px; font-weight: bold; color: #333;");
+    titleLabel->setAlignment(Qt::AlignCenter);
+    groupBoxLayout->addWidget(titleLabel, 0, 0, 1, 2, Qt::AlignCenter); // Span across 2 columns
+
+    // Create Widgets
+    QLabel *label1 = new QLabel("Class Name:", newGroupBox);
+    label1->setStyleSheet("font-size: 14px;");
+    QLineEdit *line1 = new QLineEdit(newGroupBox);
+    line1->setPlaceholderText("Type here...");
+    line1->setStyleSheet("font-size: 14px; padding: 5px; border: 1px solid gray; border-radius: 5px;");
+
+    QLabel *label2 = new QLabel("Registration Number:", newGroupBox);
+    label2->setStyleSheet("font-size: 14px;");
+    QLineEdit *line2 = new QLineEdit(newGroupBox);
+    line2->setPlaceholderText("Type here...");
+    line2->setStyleSheet("font-size: 14px; padding: 5px; border: 1px solid gray; border-radius: 5px;");
+
+    QLabel *label3 = new QLabel("Marks:", newGroupBox);
+    label3->setStyleSheet("font-size: 14px;");
+    QLineEdit *line3 = new QLineEdit(newGroupBox);
+    line3->setPlaceholderText("Type here...");
+    line3->setStyleSheet("font-size: 14px; padding: 5px; border: 1px solid gray; border-radius: 5px;");
+
+    QPushButton *submitButton = new QPushButton("Submit", newGroupBox);
+    submitButton->setStyleSheet("background-color: #007BFF; color: white; font-size: 14px; padding: 5px 10px; border-radius: 5px;");
+
+    // Add Widgets to Layout with Proper Positioning
+    groupBoxLayout->addWidget(label1, 1, 0);
+    groupBoxLayout->addWidget(line1, 1, 1);
+
+    groupBoxLayout->addWidget(label2, 2, 0);
+    groupBoxLayout->addWidget(line2, 2, 1);
+
+    groupBoxLayout->addWidget(label3, 3, 0);
+    groupBoxLayout->addWidget(line3, 3, 1);
+
+    groupBoxLayout->addWidget(submitButton, 4, 0, 1, 2, Qt::AlignCenter); // Spanning 2 columns, centered
+
+    // Set layout for GroupBox
+    newGroupBox->setLayout(groupBoxLayout);
+
+    // Add the GroupBox to the main layout inside groupBox_2
+    layout->addWidget(newGroupBox);
+
+    // Connect button to action
+    connect(submitButton, &QPushButton::clicked, this, [=]() {
+        QString className = line1->text().trimmed();
+        QString regNumber = line2->text().trimmed();
+        QString marks = line3->text().trimmed();
+
+        if (className.isEmpty() || regNumber.isEmpty() || marks.isEmpty()) {
+            QMessageBox::warning(this, "Input Error", "Please fill in all fields before submitting.");
+            return;
+        }
+
+        // Validate marks (ensure it's a number)
+        bool ok;
+        int marksValue = marks.toInt(&ok);
+        if (!ok) {
+            QMessageBox::warning(this, "Invalid Input", "Marks should be a valid number.");
+            return;
+        }
+
+        // Initialize Database Connection
+        QSqlDatabase db2 = QSqlDatabase::addDatabase("QSQLITE", "student_connection");
+        QString dbPath1 = "C:/Users/karki/project/database/student.db";
+        db2.setDatabaseName(dbPath1);
+
+        if (!db2.open()) {
+            QMessageBox::critical(this, "Database Error", "Failed to open database: " + db2.lastError().text());
+            return;
+        }
+
+        QSqlQuery createTableQuery(db2);
+        QString createTableSQL = QString(
+                                     "CREATE TABLE IF NOT EXISTS %1 ("
+
+                                     "reg_number TEXT UNIQUE, "
+                                     "marks INTEGER"
+                                     ");"
+                                     ).arg(className);
+
+        if (!createTableQuery.exec(createTableSQL)) {
+            QMessageBox::critical(this, "Database Error", "Failed to create table: " + createTableQuery.lastError().text());
+            db2.close();
+            return;
+        }
+
+        // Insert Data into the Table
+        QSqlQuery insertQuery(db2);
+        insertQuery.prepare(QString("INSERT INTO %1 (reg_number, marks) VALUES (:reg_number, :marks)").arg(className));
+        insertQuery.bindValue(":reg_number", regNumber);
+        insertQuery.bindValue(":marks", marksValue);
+
+        if (!insertQuery.exec()) {
+            QMessageBox::critical(this, "Database Error", "Failed to insert data: " + insertQuery.lastError().text());
+            db2.close();
+            return;
+        }
+
+        QMessageBox::information(this, "Data Submitted", "Your data has been successfully submitted.");
+
+
+        // Close the database connection
+        db2.close();
+    });
+}
 
