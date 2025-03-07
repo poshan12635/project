@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->lineEdit_2->setEchoMode(QLineEdit::Password);
 
     // Database connection
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase("QSQLITE","admin");
     QString dbPath = "C:/Users/karki/project/database/admin.db";
     db.setDatabaseName(dbPath);
 
